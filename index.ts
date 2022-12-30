@@ -10,6 +10,52 @@
 
 let map: google.maps.Map, heatmap: google.maps.visualization.HeatmapLayer;
 
+const csvForm = document.getElementById("csvForm") as HTMLFormElement;
+const csvFile = document.getElementById("csvFile") as HTMLInputElement;
+let final_vals = [];
+csvForm.addEventListener("submit", (e: Event) => {
+  e.preventDefault(); // prevent HTML form submission
+
+  let csvReader = new FileReader();
+  let input: File; // generate a filereader from the JS API
+  if (csvFile != null) {
+    input = csvFile!.files![0];
+  }
+  // grab the first (only) file from the input
+
+  // generating the function that will run on the action
+  csvReader.onload = function (evt) {
+    const text = evt!.target!.result; // this is the data generated from the csvReader reading the information in the file
+
+    // Ensure the type of information from the file is a string
+    if (typeof text === "string" || text instanceof String) {
+      // const values = text.split(/[\n]+/); // group the information by the CSV breakpoint \n is a new line
+      heatmap.setData(processCSV(text));
+      console.log(text);
+    }
+  };
+  if (csvFile != null) {
+    csvReader.readAsText(input!);
+  }
+  // this runs the above action
+});
+
+function processCSV(myCSV) {
+  var data = myCSV.split("\n"); // Converts the CSV into an array split on new line.
+
+  /* This will remove the "latitude,longitude" text from the 
+   coordinates if it is the top of the CSV file. If it is not at the 
+  top then you can leave this out. */
+  var dataShift = data.shift();
+
+  var setData: Array<google.maps.LatLng> = data.map(function (val) {
+    // maps over the array.
+    var latLng = val.split(","); // splits each value into lat and lng.
+    return new google.maps.LatLng(latLng[1], latLng[2]); //sets the coordinate object.
+  });
+  return setData; // returns the data.
+}
+
 function initMap(): void {
   map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
     zoom: 13,
