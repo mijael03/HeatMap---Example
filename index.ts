@@ -22,7 +22,9 @@ csvForm.addEventListener("submit", (e: Event) => {
     input = csvFile!.files![0];
   }
   // grab the first (only) file from the input
-
+  if (csvFile != null) {
+    csvReader.readAsText(input!);
+  }
   // generating the function that will run on the action
   csvReader.onload = function (evt) {
     const text = evt!.target!.result; // this is the data generated from the csvReader reading the information in the file
@@ -34,35 +36,19 @@ csvForm.addEventListener("submit", (e: Event) => {
       console.log(text);
     }
   };
-  if (csvFile != null) {
-    csvReader.readAsText(input!);
-  }
-  // this runs the above action
 });
 
-function processCSV(myCSV) {
-  var data = myCSV.split("\n"); // Converts the CSV into an array split on new line.
-
-  /* This will remove the "latitude,longitude" text from the 
-   coordinates if it is the top of the CSV file. If it is not at the 
-  top then you can leave this out. */
-  var dataShift = data.shift();
-
-  var setData: Array<google.maps.LatLng> = data.map(function (val) {
-    // maps over the array.
-    var latLng = val.split(","); // splits each value into lat and lng.
-    return new google.maps.LatLng(latLng[1], latLng[2]); //sets the coordinate object.
-  });
-  return setData; // returns the data.
-}
 
 function initMap(): void {
+  //Iniciamos el mapa referenciando el elemento html que tomará para renderizarse
+  //Tendrá un zoom de 15 y estará centrado en Killari, iniciará en vista satélite
   map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
-    zoom: 13,
-    center: { lat: 37.775, lng: -122.434 },
+    zoom: 15,
+    center: { lat: -16.41581340646506, lng: -71.52061880815006 },
     mapTypeId: "satellite",
   });
-
+  // Creamos el objeto de tipo HeatmapLayer al cual le pasamos dos parámetros:
+  // el mapa en el cual se renderizará y los datos que usará para crear el mapa de calor
   heatmap = new google.maps.visualization.HeatmapLayer({
     data: getPoints(),
     map: map,
@@ -103,7 +89,6 @@ function changeGradient(): void {
     "rgba(191, 0, 31, 1)",
     "rgba(255, 0, 0, 1)",
   ];
-
   heatmap.set("gradient", heatmap.get("gradient") ? null : gradient);
 }
 
